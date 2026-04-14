@@ -406,50 +406,6 @@
     text-transform: uppercase; color: var(--amber);
   }
 
-  /* ── CLIENTES ── */
-  #clientes { background: var(--black); }
-  .clients-marquee {
-    margin-top: 3.5rem; overflow: hidden;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 2rem 0;
-  }
-  .clients-track {
-    display: flex; gap: 0; white-space: nowrap;
-    animation: ticker 30s linear infinite;
-  }
-  .client-chip {
-    display: inline-flex; align-items: center; gap: .7rem;
-    padding: .7rem 2.2rem; margin: 0;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem; font-weight: 600; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--text-muted);
-    white-space: nowrap;
-    transition: color .2s;
-  }
-  .client-chip::before {
-    content: ''; width: 6px; height: 6px;
-    background: var(--amber); border-radius: 50%; flex-shrink: 0;
-  }
-  .clients-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1px; background: var(--border); margin-top: 3rem;
-  }
-  .client-card {
-    background: var(--dark); padding: 2rem 1.5rem;
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; text-align: center;
-    transition: background .2s; min-height: 110px;
-  }
-  .client-card:hover { background: var(--surface); }
-  .client-card-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem; font-weight: 700; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--text-muted);
-    transition: color .2s; line-height: 1.3;
-  }
-  .client-card:hover .client-card-name { color: var(--white); }
-  .client-card-icon { font-size: 1.4rem; margin-bottom: .5rem; opacity: .6; }
 
   /* ── CONTACTO ── */
   #contacto { background: var(--dark); }
@@ -516,12 +472,19 @@
     flex-wrap: wrap; gap: 2rem;
   }
   .footer-logo {
-    font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem;
     color: var(--white); display: flex; align-items: center; gap: .6rem;
+    line-height: 1; white-space: nowrap;
   }
   .footer-logo span { color: var(--amber); }
+  .footer-logo .srl {
+    font-size: .65rem; letter-spacing: .18em;
+    color: var(--text-muted); font-family: 'Barlow', sans-serif;
+    font-weight: 600; text-transform: uppercase;
+    align-self: flex-end; padding-bottom: .1rem;
+  }
   .footer-logo::before {
-    content: ''; width: 6px; height: 22px; background: var(--amber);
+    content: ''; width: 5px; height: 22px; background: var(--amber);
   }
   .footer-text { font-size: .82rem; color: var(--text-muted); margin-top: .3rem; }
   .footer-social { display: flex; gap: .8rem; }
@@ -580,7 +543,6 @@
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#equipos">Equipos</a></li>
     <li><a href="#hormigon">Hormigón</a></li>
-    <li><a href="#clientes">Clientes</a></li>
     <li><a href="#contacto">Contacto</a></li>
   </ul>
   <a href="#contacto" class="nav-cta">Consultar</a>
@@ -608,11 +570,6 @@
     <div class="stat">
       <div class="stat-num">35+</div>
       <div class="stat-label">Equipos activos</div>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat">
-      <div class="stat-num">8</div>
-      <div class="stat-label">Clientes principales</div>
     </div>
   </div>
 </section>
@@ -805,21 +762,6 @@
   </div>
 </section>
 
-<!-- CLIENTES -->
-<section id="clientes">
-  <div class="section-label reveal">Quienes confían en nosotros</div>
-  <h2 class="section-title reveal">NUESTROS<br><em>CLIENTES</em></h2>
-  <div class="clients-grid" style="margin-top:3rem;">
-    <div class="client-card reveal"><div class="client-card-icon">🏛️</div><div class="client-card-name">Municipalidad de Sierra Grande</div></div>
-    <div class="client-card reveal"><div class="client-card-icon">🏛️</div><div class="client-card-name">Municipalidad de Centenario</div></div>
-    <div class="client-card reveal"><div class="client-card-icon">🏛️</div><div class="client-card-name">Municipalidad de Cipolletti</div></div>
-    <div class="client-card reveal"><div class="client-card-icon">🏭</div><div class="client-card-name">Cerámica Cunmalleu</div></div>
-    <div class="client-card reveal"><div class="client-card-icon">🚛</div><div class="client-card-name">Servaind Logística</div></div>
-    <div class="client-card reveal"><div class="client-card-icon">🚂</div><div class="client-card-name">Ferrosur Roca</div></div>
-    <div class="client-card reveal"><div class="client-card-icon">♻️</div><div class="client-card-name">Ecogestión</div></div>
-    <div class="client-card reveal"><div class="client-card-icon">🏗️</div><div class="client-card-name">Planobra</div></div>
-  </div>
-</section>
 
 <!-- CONTACTO -->
 <section id="contacto">
@@ -908,7 +850,7 @@
 <!-- FOOTER -->
 <footer>
   <div>
-    <div class="footer-logo">VIAL<span>CON</span></div>
+    <div class="footer-logo">MÁQUINAS <span>PATAGÓNICAS</span><span class="srl">S.R.L.</span></div>
     <div class="footer-text">Máquinas Patagónicas SRL — Patagonia Argentina</div>
   </div>
   <div class="footer-social">
