@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Máquinas Patagónicas SRL</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --dark: #111111;
+    --surface: #181818;
+    --surface2: #222222;
+    --border: #2a2a2a;
+    --amber: #f0a500;
+    --amber-light: #ffc235;
+    --amber-dim: rgba(240,165,0,0.12);
+    --text: #e8e2d6;
+    --text-muted: #888880;
+    --white: #f5f0e8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── CUSTOM CURSOR ── */
+  .cursor {
+    position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+  }
+  .cursor-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--amber);
+    position: absolute; transform: translate(-50%, -50%);
+    transition: transform .1s;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid rgba(240,165,0,.5);
+    position: absolute; transform: translate(-50%, -50%);
+    transition: transform .18s ease, width .2s, height .2s, border-color .2s;
+  }
+  body:has(a:hover) .cursor-ring,
+  body:has(button:hover) .cursor-ring {
+    width: 52px; height: 52px; border-color: var(--amber);
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 0 5vw;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 72px;
+    background: rgba(10,10,10,.88);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    transition: all .3s;
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem; letter-spacing: .1em;
+    color: var(--white);
+    text-decoration: none;
+    display: flex; align-items: center; gap: .6rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .nav-logo span { color: var(--amber); }
+  .nav-logo .srl {
+    font-size: .7rem; letter-spacing: .18em;
+    color: var(--text-muted); font-family: 'Barlow', sans-serif;
+    font-weight: 600; text-transform: uppercase;
+    align-self: flex-end; padding-bottom: .1rem;
+  }
+  .nav-logo::before {
+    content: '';
+    display: inline-block; width: 6px; height: 26px;
+    background: var(--amber); flex-shrink: 0;
+  }
+  .nav-links {
+    display: flex; gap: 2.4rem; list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none;
+    font-size: .82rem; letter-spacing: .15em; text-transform: uppercase; font-weight: 500;
+    transition: color .2s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; left: 0; bottom: -4px;
+    width: 0; height: 1px; background: var(--amber);
+    transition: width .3s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    background: var(--amber); color: var(--black);
+    border: none; padding: .55rem 1.4rem;
+    font-family: 'Barlow', sans-serif; font-size: .82rem;
+    font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    cursor: none; text-decoration: none;
+    transition: background .2s, transform .15s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .nav-cta:hover { background: var(--amber-light); transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 5vw 8vh;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(160deg, rgba(240,165,0,.05) 0%, transparent 40%),
+      linear-gradient(to top, rgba(10,10,10,.96) 0%, rgba(10,10,10,.5) 60%, transparent 100%),
+      url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat;
+    z-index: 0;
+    transform: scale(1.05);
+    animation: heroZoom 16s ease-out forwards;
+  }
+  @keyframes heroZoom { from { transform: scale(1.05); } to { transform: scale(1.0); } }
+
+  .hero-grid-overlay {
+    position: absolute; inset: 0; z-index: 1;
+    background-image:
+      linear-gradient(rgba(240,165,0,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240,165,0,.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: linear-gradient(to top, black 0%, transparent 70%);
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 900px; }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: .6rem;
+    background: var(--amber-dim); border: 1px solid rgba(240,165,0,.3);
+    padding: .4rem 1rem; margin-bottom: 1.8rem;
+    font-size: .75rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--amber); font-weight: 600;
+    animation: fadeUp .8s .2s ease both;
+  }
+  .hero-tag::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--amber); animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 10rem);
+    line-height: .92; letter-spacing: .03em;
+    color: var(--white);
+    animation: fadeUp .9s .4s ease both;
+  }
+  .hero-title em { color: var(--amber); font-style: normal; }
+  .hero-sub {
+    margin-top: 1.6rem; max-width: 520px;
+    font-size: 1.1rem; line-height: 1.65;
+    color: var(--text-muted); font-weight: 300;
+    animation: fadeUp .9s .6s ease both;
+  }
+  .hero-actions {
+    margin-top: 2.8rem; display: flex; gap: 1.2rem; align-items: center;
+    animation: fadeUp .9s .8s ease both;
+  }
+  .btn-primary {
+    background: var(--amber); color: var(--black);
+    padding: .9rem 2.2rem; font-weight: 700;
+    font-size: .9rem; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; transition: all .2s;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-primary:hover { background: var(--amber-light); transform: translateY(-2px); }
+  .btn-ghost {
+    color: var(--text); border: 1px solid var(--border);
+    padding: .9rem 2.2rem; font-weight: 500;
+    font-size: .9rem; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; transition: all .2s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
+  .hero-stats {
+    position: absolute; right: 5vw; bottom: 8vh; z-index: 2;
+    display: flex; flex-direction: column; gap: 1.6rem;
+    animation: fadeLeft .9s .9s ease both;
+  }
+  .stat { text-align: right; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 3rem;
+    color: var(--amber); line-height: 1;
+  }
+  .stat-label {
+    font-size: .72rem; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-top: .2rem;
+  }
+  .stat-divider { width: 1px; height: 40px; background: var(--border); margin-left: auto; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:none; } }
+  @keyframes fadeLeft { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:none; } }
+
+  /* ── SECTION DEFAULTS ── */
+  section { padding: 7rem 5vw; }
+  .section-label {
+    font-size: .72rem; letter-spacing: .3em; text-transform: uppercase;
+    color: var(--amber); font-weight: 600; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: .8rem;
+  }
+  .section-label::before { content: ''; width: 28px; height: 1px; background: var(--amber); }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 5.5rem);
+    line-height: 1; letter-spacing: .04em;
+    color: var(--white);
+  }
+  .section-title em { color: var(--amber); font-style: normal; }
+
+  /* ── TICKER ── */
+  .ticker {
+    background: var(--amber); padding: .7rem 0; overflow: hidden;
+    border-top: 1px solid rgba(0,0,0,.2);
+    border-bottom: 1px solid rgba(0,0,0,.2);
+  }
+  .ticker-track {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: ticker 22s linear infinite;
+  }
+  .ticker-item {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700; letter-spacing: .25em;
+    text-transform: uppercase; color: var(--black);
+    padding: 0 2.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .ticker-item::after { content: '◆'; font-size: .5rem; opacity: .5; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ── SERVICES ── */
+  #servicios { background: var(--dark); }
+  .services-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5px; margin-top: 4rem;
+    border: 1.5px solid var(--border);
+  }
+  .service-card {
+    background: var(--surface);
+    padding: 2.4rem 2rem; position: relative;
+    overflow: hidden; transition: background .3s;
+    border: 1.5px solid transparent;
+    cursor: none;
+  }
+  .service-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: var(--amber); transform: scaleX(0); transform-origin: left;
+    transition: transform .35s ease;
+  }
+  .service-card:hover { background: var(--surface2); border-color: var(--border); }
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 4rem;
+    color: rgba(240,165,0,.1); position: absolute;
+    top: 1rem; right: 1.4rem; line-height: 1;
+    transition: color .3s;
+  }
+  .service-card:hover .service-num { color: rgba(240,165,0,.2); }
+  .service-icon {
+    width: 44px; height: 44px; background: var(--amber-dim);
+    border: 1px solid rgba(240,165,0,.2);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.4rem; font-size: 1.3rem;
+  }
+  .service-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.4rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--white); margin-bottom: .8rem;
+  }
+  .service-desc {
+    font-size: .9rem; line-height: 1.65; color: var(--text-muted);
+  }
+  .service-tag {
+    display: inline-block; margin-top: 1rem;
+    background: var(--amber-dim); border: 1px solid rgba(240,165,0,.2);
+    padding: .25rem .7rem; font-size: .7rem;
+    letter-spacing: .15em; text-transform: uppercase; color: var(--amber);
+  }
+
+  /* ── EQUIPOS ── */
+  #equipos { background: var(--black); }
+  .equip-tabs {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border); margin: 3rem 0 2.5rem;
+  }
+  .equip-tab {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    padding: .8rem 1.6rem; font-family: 'Barlow', sans-serif;
+    font-size: .82rem; font-weight: 600; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--text-muted);
+    cursor: none; transition: all .2s; position: relative; bottom: -1px;
+  }
+  .equip-tab.active, .equip-tab:hover {
+    color: var(--amber); border-bottom-color: var(--amber);
+  }
+  .equip-panel { display: none; }
+  .equip-panel.active { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+  .equip-item {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 1.2rem 1.4rem;
+    display: flex; align-items: flex-start; gap: .8rem;
+    transition: border-color .2s, transform .2s;
+  }
+  .equip-item:hover { border-color: var(--amber); transform: translateY(-3px); }
+  .equip-bullet {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--amber); flex-shrink: 0; margin-top: .35rem;
+  }
+  .equip-name {
+    font-size: .88rem; font-weight: 600; color: var(--white); line-height: 1.35;
+  }
+
+  /* ── HORMIGON ── */
+  #hormigon { background: var(--surface); }
+  .hormigon-layout {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4rem; margin-top: 4rem; align-items: start;
+  }
+  .hormigon-info h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.6rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--white); margin: 2rem 0 .8rem;
+  }
+  .hormigon-info h3:first-child { margin-top: 0; }
+  .hormigon-info p {
+    font-size: .92rem; line-height: 1.7; color: var(--text-muted);
+  }
+  .grades-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+    margin-top: 2rem;
+  }
+  .grade-card {
+    background: var(--black); border: 1px solid var(--border);
+    padding: 1.8rem; text-align: center;
+    transition: border-color .25s, background .25s;
+    position: relative; overflow: hidden;
+  }
+  .grade-card::after {
+    content: ''; position: absolute;
+    inset: 0; background: var(--amber-dim);
+    opacity: 0; transition: opacity .25s;
+  }
+  .grade-card:hover { border-color: var(--amber); }
+  .grade-card:hover::after { opacity: 1; }
+  .grade-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem;
+    color: var(--amber); display: block; position: relative; z-index: 1;
+  }
+  .grade-label {
+    font-size: .78rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--text-muted); position: relative; z-index: 1;
+  }
+  .plants-box {
+    background: var(--black); border: 1px solid var(--border); padding: 2rem; margin-top: 2rem;
+  }
+  .plants-box h4 {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 1rem;
+    font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--amber); margin-bottom: 1rem;
+  }
+  .plant-item {
+    display: flex; align-items: center; gap: .8rem;
+    padding: .7rem 0; border-bottom: 1px solid var(--border);
+    font-size: .9rem; color: var(--text);
+  }
+  .plant-item:last-child { border-bottom: none; }
+  .plant-dot { width: 6px; height: 6px; background: var(--amber); border-radius: 50; flex-shrink: 0; }
+  .other-grades-btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    margin-top: 1.2rem;
+    background: transparent; border: 1px dashed rgba(240,165,0,.5);
+    color: var(--amber); text-decoration: none;
+    padding: .75rem 1.4rem; font-size: .82rem;
+    font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    transition: background .2s, border-color .2s;
+  }
+  .other-grades-btn:hover { background: var(--amber-dim); border-color: var(--amber); }
+  .mixer-grid { display: flex; flex-direction: column; gap: .8rem; margin-top: 1.5rem; }
+  .mixer-item {
+    background: var(--black); border: 1px solid var(--border);
+    padding: .9rem 1.2rem; display: flex; justify-content: space-between; align-items: center;
+    font-size: .88rem; transition: border-color .2s;
+  }
+  .mixer-item:hover { border-color: var(--amber); }
+  .mixer-model { font-weight: 600; color: var(--white); }
+  .mixer-cap {
+    background: var(--amber-dim); border: 1px solid rgba(240,165,0,.25);
+    padding: .2rem .6rem; font-size: .72rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--amber);
+  }
+
+  /* ── CLIENTES ── */
+  #clientes { background: var(--black); }
+  .clients-marquee {
+    margin-top: 3.5rem; overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 0;
+  }
+  .clients-track {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: ticker 30s linear infinite;
+  }
+  .client-chip {
+    display: inline-flex; align-items: center; gap: .7rem;
+    padding: .7rem 2.2rem; margin: 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--text-muted);
+    white-space: nowrap;
+    transition: color .2s;
+  }
+  .client-chip::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--amber); border-radius: 50%; flex-shrink: 0;
+  }
+  .clients-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1px; background: var(--border); margin-top: 3rem;
+  }
+  .client-card {
+    background: var(--dark); padding: 2rem 1.5rem;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center;
+    transition: background .2s; min-height: 110px;
+  }
+  .client-card:hover { background: var(--surface); }
+  .client-card-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text-muted);
+    transition: color .2s; line-height: 1.3;
+  }
+  .client-card:hover .client-card-name { color: var(--white); }
+  .client-card-icon { font-size: 1.4rem; margin-bottom: .5rem; opacity: .6; }
+
+  /* ── CONTACTO ── */
+  #contacto { background: var(--dark); }
+  .contact-layout {
+    display: grid; grid-template-columns: 1fr 1.4fr;
+    gap: 5rem; margin-top: 4rem; align-items: start;
+  }
+  .contact-info p {
+    font-size: .95rem; line-height: 1.7; color: var(--text-muted); margin-top: 1rem;
+  }
+  .contact-channels { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .channel-link {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1rem 1.2rem; border: 1px solid var(--border);
+    text-decoration: none; color: var(--text);
+    transition: border-color .2s, color .2s, transform .2s;
+  }
+  .channel-link:hover { border-color: var(--amber); color: var(--amber); transform: translateX(6px); }
+  .channel-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+  .channel-label { font-size: .78rem; letter-spacing: .15em; text-transform: uppercase; color: var(--text-muted); }
+  .channel-value { font-weight: 600; font-size: .95rem; }
+
+  /* ── FORM ── */
+  .contact-form { display: flex; flex-direction: column; gap: 1.2rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .form-group { display: flex; flex-direction: column; gap: .45rem; }
+  .form-label {
+    font-size: .72rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--text-muted); font-weight: 600;
+  }
+  .form-input, .form-textarea, .form-select {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: .85rem 1rem;
+    font-family: 'Barlow', sans-serif; font-size: .92rem;
+    outline: none; transition: border-color .2s;
+    width: 100%;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--amber); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+  .form-textarea { resize: vertical; min-height: 120px; }
+  .form-select option { background: var(--surface); }
+  .btn-submit {
+    background: var(--amber); color: var(--black);
+    border: none; padding: 1rem 2.4rem;
+    font-family: 'Barlow', sans-serif; font-weight: 700;
+    font-size: .9rem; letter-spacing: .14em; text-transform: uppercase;
+    cursor: none; transition: all .2s; align-self: flex-start;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    display: flex; align-items: center; gap: .6rem;
+    margin-top: .4rem;
+  }
+  .btn-submit:hover { background: var(--amber-light); transform: translateY(-2px); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--black); border-top: 1px solid var(--border);
+    padding: 3.5rem 5vw;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 2rem;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
+    color: var(--white); display: flex; align-items: center; gap: .6rem;
+  }
+  .footer-logo span { color: var(--amber); }
+  .footer-logo::before {
+    content: ''; width: 6px; height: 22px; background: var(--amber);
+  }
+  .footer-text { font-size: .82rem; color: var(--text-muted); margin-top: .3rem; }
+  .footer-social { display: flex; gap: .8rem; }
+  .social-btn {
+    width: 40px; height: 40px; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; color: var(--text-muted); font-size: 1rem;
+    transition: border-color .2s, color .2s, background .2s;
+  }
+  .social-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+  .footer-copy { font-size: .75rem; color: var(--text-muted); text-align: right; }
+
+  /* ── WHATSAPP FLOAT ── */
+  .wa-float {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 200;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: #25d366;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; font-size: 1.5rem;
+    box-shadow: 0 4px 20px rgba(37,211,102,.5);
+    transition: transform .2s, box-shadow .2s;
+    animation: waPulse 2.5s ease-in-out infinite;
+  }
+  .wa-float:hover { transform: scale(1.12); box-shadow: 0 6px 28px rgba(37,211,102,.7); }
+  @keyframes waPulse {
+    0%,100%{ box-shadow: 0 4px 20px rgba(37,211,102,.5); }
+    50%{ box-shadow: 0 4px 32px rgba(37,211,102,.85); }
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .nav-links, .nav-cta { display: none; }
+    .hero-stats { display: none; }
+    .hormigon-layout, .contact-layout, .form-row { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    .equip-tabs { overflow-x: auto; flex-wrap: nowrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor">
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#hero">MÁQUINAS <span>PATAGÓNICAS</span><span class="srl">S.R.L.</span></a>
+  <ul class="nav-links">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#equipos">Equipos</a></li>
+    <li><a href="#hormigon">Hormigón</a></li>
+    <li><a href="#clientes">Clientes</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <a href="#contacto" class="nav-cta">Consultar</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Máquinas Patagónicas SRL · Patagonia</div>
+    <h1 class="hero-title">MOVEMOS<br><em>LA TIERRA</em><br>POR VOS</h1>
+    <p class="hero-sub">Empresa líder en movimiento de suelos, hormigón elaborado, redes de infraestructura y alquiler de equipos pesados para la región patagónica.</p>
+    <div class="hero-actions">
+      <a href="#servicios" class="btn-primary">Ver servicios →</a>
+      <a href="#contacto" class="btn-ghost">Solicitar presupuesto</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">20+</div>
+      <div class="stat-label">Años de trayectoria</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num">35+</div>
+      <div class="stat-label">Equipos activos</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Clientes principales</div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">Movimiento de suelos</span>
+    <span class="ticker-item">Hormigón elaborado</span>
+    <span class="ticker-item">Redes de agua y gas</span>
+    <span class="ticker-item">Servicio petrolero</span>
+    <span class="ticker-item">Demoliciones</span>
+    <span class="ticker-item">Alquiler de equipos</span>
+    <span class="ticker-item">Excavaciones</span>
+    <span class="ticker-item">Plantas de hormigón</span>
+    <!-- duplicado para loop -->
+    <span class="ticker-item">Movimiento de suelos</span>
+    <span class="ticker-item">Hormigón elaborado</span>
+    <span class="ticker-item">Redes de agua y gas</span>
+    <span class="ticker-item">Servicio petrolero</span>
+    <span class="ticker-item">Demoliciones</span>
+    <span class="ticker-item">Alquiler de equipos</span>
+    <span class="ticker-item">Excavaciones</span>
+    <span class="ticker-item">Plantas de hormigón</span>
+  </div>
+</div>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="section-label reveal">Nuestros servicios</div>
+  <h2 class="section-title reveal">LO QUE<br><em>HACEMOS</em></h2>
+  <div class="services-grid" style="margin-top:4rem;">
+    <div class="service-card reveal">
+      <div class="service-num">01</div>
+      <div class="service-icon">🏔️</div>
+      <div class="service-name">Movimiento de Suelos</div>
+      <p class="service-desc">Ejecutamos trabajos de nivelación, compactación, corte y relleno para vialidad, urbanizaciones e infraestructura industrial. Contamos con maquinaria de última generación que garantiza rendimiento y precisión en todo tipo de terreno patagónico.</p>
+      <span class="service-tag">Infraestructura</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">02</div>
+      <div class="service-icon">💧</div>
+      <div class="service-name">Redes de Agua, Gas y Cloacas</div>
+      <p class="service-desc">Instalación y tendido de redes de distribución de agua potable, gas natural y sistemas cloacales. Realizamos excavaciones de zanjeo, colocación de cañerías y tapado con compactación adecuada, asegurando cumplimiento normativo y calidad de obra.</p>
+      <span class="service-tag">Infraestructura urbana</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">03</div>
+      <div class="service-icon">🛢️</div>
+      <div class="service-name">Servicio a Petroleras</div>
+      <p class="service-desc">Prestamos servicios integrales para el sector hidrocarburífero: apertura y mantenimiento de picadas, accesos a locaciones, planchadas y movimiento de tierras en yacimientos. Operamos con estrictos protocolos de seguridad HSE para la industria del petróleo y gas.</p>
+      <span class="service-tag">Oil &amp; Gas</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">04</div>
+      <div class="service-icon">🧱</div>
+      <div class="service-name">Hormigón Elaborado</div>
+      <p class="service-desc">Producción y provisión de hormigón elaborado en resistencias H17, H21, H25 y H30. Contamos con dos plantas propias (Indumix 60 y Tecnus 30) y flota de mixer para garantizar entrega continua, volúmenes a demanda y óptima trabajabilidad en obra.</p>
+      <span class="service-tag">H17 · H21 · H25 · H30</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">05</div>
+      <div class="service-icon">💥</div>
+      <div class="service-name">Demoliciones y Excavaciones</div>
+      <p class="service-desc">Demolición controlada de estructuras, excavaciones para fundaciones, piletas, cámaras y sótanos. Utilizamos excavadoras con martillo hidráulico y balde de roca para intervenciones en suelos duros, garantizando seguridad y mínimo impacto en el entorno.</p>
+      <span class="service-tag">Demolición controlada</span>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-num">06</div>
+      <div class="service-icon">🚧</div>
+      <div class="service-name">Alquiler de Equipos</div>
+      <p class="service-desc">Ponemos a disposición de constructoras, municipios y empresas nuestra amplia flota de equipos pesados: minicargadoras, retropalas, excavadoras, motoniveladoras, palas cargadoras y camiones. Operados o sin operar, con mantenimiento incluido y total disponibilidad.</p>
+      <span class="service-tag">Flota disponible</span>
+    </div>
+  </div>
+</section>
+
+<!-- EQUIPOS -->
+<section id="equipos">
+  <div class="section-label reveal">Flota operativa</div>
+  <h2 class="section-title reveal">NUESTROS<br><em>EQUIPOS</em></h2>
+  <div class="equip-tabs">
+    <button class="equip-tab active" onclick="switchTab(this,'minicargadoras')">Minicargadoras</button>
+    <button class="equip-tab" onclick="switchTab(this,'retropalas')">Retropalas</button>
+    <button class="equip-tab" onclick="switchTab(this,'palas')">Palas Cargadoras</button>
+    <button class="equip-tab" onclick="switchTab(this,'excavadoras')">Excavadoras</button>
+    <button class="equip-tab" onclick="switchTab(this,'motoniveladoras')">Motoniveladoras</button>
+    <button class="equip-tab" onclick="switchTab(this,'camiones')">Camiones</button>
+    <button class="equip-tab" onclick="switchTab(this,'bateas')">Bateas</button>
+    <button class="equip-tab" onclick="switchTab(this,'mixer-tab')">Mixer</button>
+  </div>
+
+  <div id="minicargadoras" class="equip-panel active reveal">
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Bobcat S 130 (×4)</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Bobcat S 150</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Bobcat S 175</span></div>
+  </div>
+  <div id="retropalas" class="equip-panel">
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Caterpillar 416</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Case 580 N 4×2</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Case 580 N 4×4 (×3)</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Maxion 750 4×4</span></div>
+  </div>
+  <div id="palas" class="equip-panel">
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Liugong 856 (×3)</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Lonking 856 (×4)</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">ZMG LW 300</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Lonking 833</span></div>
+  </div>
+  <div id="excavadoras" class="equip-panel">
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Caterpillar 320</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Tiangong 323 c/martillo</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Tiangong 323 c/balde rok</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Bobcat E80 c/balde y martillo</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Bobcat E80 c/martillo</span></div>
+  </div>
+  <div id="motoniveladoras" class="equip-panel">
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Caterpillar 140 H</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">John Deere 670 D</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Lomatsu 825</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Liangong PY 180</span></div>
+  </div>
+  <div id="camiones" class="equip-panel">
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">VW 17250 (×2)</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">VW 17220</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">VW 17310</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Ford 14000 (×2)</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">VW 10150</span></div>
+  </div>
+  <div id="bateas" class="equip-panel">
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Ombú 24m²</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Lambert 25m³</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Pluscarga 25m²</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Carretón Salto 3 E</span></div>
+  </div>
+  <div id="mixer-tab" class="equip-panel">
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">VW 26280 Indumix — 8m³</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Ford 2632 Indumix — 7m³</span></div>
+    <div class="equip-item"><span class="equip-bullet"></span><span class="equip-name">Ford 1730 Indumix — 7m³</span></div>
+  </div>
+</section>
+
+<!-- HORMIGON -->
+<section id="hormigon">
+  <div class="section-label reveal">Producción propia</div>
+  <h2 class="section-title reveal">HORMIGÓN<br><em>ELABORADO</em></h2>
+  <div class="hormigon-layout">
+    <div class="hormigon-info reveal">
+      <h3>Resistencias disponibles</h3>
+      <p>Producimos y proveemos hormigón elaborado en distintas resistencias para cubrir cualquier requerimiento estructural, desde veredas y losas livianas hasta fundaciones industriales y obras viales de alta exigencia.</p>
+      <div class="grades-grid">
+        <div class="grade-card"><span class="grade-num">H17</span><span class="grade-label">Uso general</span></div>
+        <div class="grade-card"><span class="grade-num">H21</span><span class="grade-label">Estructural</span></div>
+        <div class="grade-card"><span class="grade-num">H25</span><span class="grade-label">Alta resistencia</span></div>
+        <div class="grade-card"><span class="grade-num">H30</span><span class="grade-label">Obra especial</span></div>
+      </div>
+      <a href="https://wa.me/5492995047167?text=Hola%20M%C3%A1quinas%20Patag%C3%B3nicas%21%20Quisiera%20consultar%20por%20otras%20resistencias%20de%20hormig%C3%B3n%20disponibles." target="_blank" class="other-grades-btn">
+        ¿Necesitás otra resistencia? Consultanos →
+      </a>
+      <div class="plants-box" style="margin-top:2rem;">
+        <h4>🏭 Plantas de hormigón</h4>
+        <div class="plant-item"><span class="plant-dot"></span>Indumix 60 — Planta de alta capacidad</div>
+        <div class="plant-item"><span class="plant-dot"></span>Tecnus 30 — Planta complementaria</div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div style="background:var(--black);border:1px solid var(--border);padding:2rem;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:1.2rem;">🚛 Flota Mixer</div>
+        <div class="mixer-grid">
+          <div class="mixer-item">
+            <span class="mixer-model">VW 26280 Indumix</span>
+            <span class="mixer-cap">8 m³</span>
+          </div>
+          <div class="mixer-item">
+            <span class="mixer-model">Ford 2632 Indumix</span>
+            <span class="mixer-cap">7 m³</span>
+          </div>
+          <div class="mixer-item">
+            <span class="mixer-model">Ford 1730 Indumix</span>
+            <span class="mixer-cap">7 m³</span>
+          </div>
+        </div>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-top:1.4rem;line-height:1.6;">Nuestra flota de mixer garantiza el traslado del hormigón elaborado directamente desde planta hacia el punto de descarga en obra, manteniendo la trabajabilidad y calidad del producto hasta la entrega final.</p>
+      </div>
+      <div style="background:var(--amber);padding:2rem;margin-top:1.2rem;">
+        <p style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--black);line-height:1.3;">Entrega a domicilio en toda la región. Pedidos programados y urgentes.</p>
+        <a href="#contacto" style="display:inline-block;margin-top:1rem;background:var(--black);color:var(--amber);padding:.7rem 1.5rem;text-decoration:none;font-weight:700;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;">Pedir presupuesto →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTES -->
+<section id="clientes">
+  <div class="section-label reveal">Quienes confían en nosotros</div>
+  <h2 class="section-title reveal">NUESTROS<br><em>CLIENTES</em></h2>
+  <div class="clients-grid" style="margin-top:3rem;">
+    <div class="client-card reveal"><div class="client-card-icon">🏛️</div><div class="client-card-name">Municipalidad de Sierra Grande</div></div>
+    <div class="client-card reveal"><div class="client-card-icon">🏛️</div><div class="client-card-name">Municipalidad de Centenario</div></div>
+    <div class="client-card reveal"><div class="client-card-icon">🏛️</div><div class="client-card-name">Municipalidad de Cipolletti</div></div>
+    <div class="client-card reveal"><div class="client-card-icon">🏭</div><div class="client-card-name">Cerámica Cunmalleu</div></div>
+    <div class="client-card reveal"><div class="client-card-icon">🚛</div><div class="client-card-name">Servaind Logística</div></div>
+    <div class="client-card reveal"><div class="client-card-icon">🚂</div><div class="client-card-name">Ferrosur Roca</div></div>
+    <div class="client-card reveal"><div class="client-card-icon">♻️</div><div class="client-card-name">Ecogestión</div></div>
+    <div class="client-card reveal"><div class="client-card-icon">🏗️</div><div class="client-card-name">Planobra</div></div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="section-label reveal">Trabajemos juntos</div>
+  <h2 class="section-title reveal">CONTAC<em>TANOS</em></h2>
+  <div class="contact-layout">
+    <div class="reveal">
+      <p>Estamos disponibles para atender consultas sobre servicios, presupuestos o alquiler de equipos en toda la región patagónica. Escribinos o completá el formulario.</p>
+      <div class="contact-channels">
+        <a href="https://wa.me/5492995047167" target="_blank" class="channel-link">
+          <div class="channel-icon">📱</div>
+          <div>
+            <div class="channel-label">WhatsApp</div>
+            <div class="channel-value">+54 9 299 504-7167</div>
+          </div>
+        </a>
+        <a href="mailto:info@maquinaspatagonicas.com.ar" class="channel-link">
+          <div class="channel-icon">✉️</div>
+          <div>
+            <div class="channel-label">Email</div>
+            <div class="channel-value">info@maquinaspatagonicas.com.ar</div>
+          </div>
+        </a>
+        <a href="https://www.instagram.com/maquinaspatagonicas/" target="_blank" class="channel-link">
+          <div class="channel-icon">📷</div>
+          <div>
+            <div class="channel-label">Instagram</div>
+            <div class="channel-value">@maquinaspatagonicas</div>
+          </div>
+        </a>
+        <a href="https://www.facebook.com/maquinaspatagonicas.maquinaspatagonicas" target="_blank" class="channel-link">
+          <div class="channel-icon">👍</div>
+          <div>
+            <div class="channel-label">Facebook</div>
+            <div class="channel-value">/maquinaspatagonicas</div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="contact-form reveal" id="contactForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" class="form-input" placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empresa</label>
+          <input type="text" class="form-input" placeholder="Tu empresa (opcional)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input type="tel" class="form-input" placeholder="+54 9 ...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" placeholder="tu@email.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Servicio de interés</label>
+        <select class="form-select">
+          <option value="">Seleccioná un servicio</option>
+          <option>Movimiento de suelos</option>
+          <option>Redes de agua, gas y cloacas</option>
+          <option>Servicio a petroleras</option>
+          <option>Hormigón elaborado</option>
+          <option>Demoliciones y excavaciones</option>
+          <option>Alquiler de equipos</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mensaje</label>
+        <textarea class="form-textarea" placeholder="Contanos sobre tu proyecto..."></textarea>
+      </div>
+      <button class="btn-submit" onclick="sendWhatsApp()">
+        Enviar consulta →
+      </button>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:.5rem;">Al enviar, serás redirigido a WhatsApp con tu mensaje listo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">VIAL<span>CON</span></div>
+    <div class="footer-text">Máquinas Patagónicas SRL — Patagonia Argentina</div>
+  </div>
+  <div class="footer-social">
+    <a href="https://www.instagram.com/maquinaspatagonicas/" target="_blank" class="social-btn" title="Instagram">📷</a>
+    <a href="https://www.facebook.com/maquinaspatagonicas.maquinaspatagonicas" target="_blank" class="social-btn" title="Facebook">👍</a>
+    <a href="https://wa.me/5492995047167" target="_blank" class="social-btn" title="WhatsApp">📱</a>
+  </div>
+  <div class="footer-copy">
+    © 2025 MÁQUINAS PATAGÓNICAS. Todos los derechos reservados.<br>
+    <span style="color:var(--border);">Diseñado para rendir en la obra y en la web.</span>
+  </div>
+</footer>
+
+<!-- WHATSAPP FLOTANTE -->
+<a href="https://wa.me/5492995047167" target="_blank" class="wa-float" title="Contactar por WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<script>
+  // ── CURSOR ──
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  (function animCursor() {
+    dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+    rx += (mx - rx) * .15; ry += (my - ry) * .15;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animCursor);
+  })();
+
+  // ── TABS ──
+  function switchTab(btn, id) {
+    document.querySelectorAll('.equip-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.equip-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── SCROLL REVEAL ──
+  const io = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: .12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ── NAV SCROLL ──
+  window.addEventListener('scroll', () => {
+    document.querySelector('nav').style.boxShadow =
+      window.scrollY > 40 ? '0 8px 32px rgba(0,0,0,.5)' : 'none';
+  });
+
+  // ── WHATSAPP FORM ──
+  function sendWhatsApp() {
+    const nombre = document.querySelector('.form-input').value || 'Sin nombre';
+    const servicio = document.querySelector('.form-select').value || 'General';
+    const mensaje = document.querySelector('.form-textarea').value || 'Sin mensaje';
+    const texto = encodeURIComponent(
+      `Hola MÁQUINAS PATAGÓNICAS! 👋\n\nNombre: ${nombre}\nServicio: ${servicio}\nMensaje: ${mensaje}`
+    );
+    window.open(`https://wa.me/5492995047167?text=${texto}`, '_blank');
+  }
+</script>
+</body>
+</html>
