@@ -798,11 +798,49 @@
         </a>
       </div>
     </div>
-    <div class="contact-form reveal" id="contactForm">
+   <form class="contact-form reveal" id="contactForm" action="https://formspree.io/f/xjgjanvz" method="POST">
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Nombre</label>
-          <input type="text" class="form-input" placeholder="Tu nombre">
+          <input type="text" name="nombre" class="form-input" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empresa</label>
+          <input type="text" name="empresa" class="form-input" placeholder="Tu empresa (opcional)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input type="tel" name="telefono" class="form-input" placeholder="+54 9 ...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-input" placeholder="tu@email.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Servicio de interés</label>
+        <select name="servicio" class="form-select">
+          <option value="">Seleccioná un servicio</option>
+          <option>Movimiento de suelos</option>
+          <option>Redes de agua, gas y cloacas</option>
+          <option>Servicio a petroleras</option>
+          <option>Hormigón elaborado</option>
+          <option>Demoliciones y excavaciones</option>
+          <option>Alquiler de equipos</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mensaje</label>
+        <textarea name="mensaje" class="form-textarea" placeholder="Contanos sobre tu proyecto..."></textarea>
+      </div>
+      <button type="submit" class="btn-submit">
+        Enviar consulta →
+      </button>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:.5rem;">Te respondemos a la brevedad por mail.</p>
+    </form>
         </div>
         <div class="form-group">
           <label class="form-label">Empresa</label>
